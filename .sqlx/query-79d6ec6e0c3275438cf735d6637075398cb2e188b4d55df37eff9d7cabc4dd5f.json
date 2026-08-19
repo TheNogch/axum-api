@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO users (id, username, age) VALUES ($1, $2, $3) RETURNING id, username, age, created_at, updated_at",
+  "query": "SELECT * FROM users ORDER BY created_at DESC",
   "describe": {
     "columns": [
       {
@@ -30,11 +30,7 @@
       }
     ],
     "parameters": {
-      "Left": [
-        "Uuid",
-        "Text",
-        "Int2"
-      ]
+      "Left": []
     },
     "nullable": [
       false,
@@ -44,5 +40,5 @@
       false
     ]
   },
-  "hash": "732ae564e9bb8c5e7c52f516547409ea8d905bf6fc991326fb06176ffdb89823"
+  "hash": "79d6ec6e0c3275438cf735d6637075398cb2e188b4d55df37eff9d7cabc4dd5f"
 }

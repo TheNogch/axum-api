@@ -3,42 +3,57 @@ use axum::{
     response::{IntoResponse, Response},
     Json,
 };
+use thiserror::Error;
 
-#[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum AppError {
+    #[error("no autorizado")]
     Unauthorized,
+
+    #[error("prohibido")]
     Forbidden,
+
+    #[error("no encontrado")]
     NotFound,
-    Conflict,
-    BadRequest,
-    SqlxError(sqlx::Error),
+
+    #[error("conflicto: {0}")]
+    Conflict(String),
+
+    #[error("solicitud inválida: {0}")]
+    BadRequest(String),
+
+    #[error("error de validación: {0}")]
+    Validation(String),
+
+    #[error("error de base de datos: {0}")]
+    SqlxError(#[from] sqlx::Error),
+
+    #[error("error interno: {0}")]
     InternalServerError(String),
 }
 
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let (status, message) = match self {
-            AppError::Unauthorized => (StatusCode::UNAUTHORIZED, "No autorizado".to_string()),
-            AppError::Forbidden    => (StatusCode::FORBIDDEN, "Prohibido".to_string()),
-            AppError::NotFound     => (StatusCode::NOT_FOUND, "No encontrado".to_string()),
-            AppError::Conflict     => (StatusCode::CONFLICT, "Ya existe".to_string()),
-            AppError::BadRequest   => (StatusCode::BAD_REQUEST, "Solicitud inválida".to_string()),
+            AppError::Unauthorized => (StatusCode::UNAUTHORIZED, "no autorizado".to_string()),
+            AppError::Forbidden => (StatusCode::FORBIDDEN, "prohibido".to_string()),
+            AppError::NotFound => (StatusCode::NOT_FOUND, "no encontrado".to_string()),
+            AppError::Conflict(msg) => (StatusCode::CONFLICT, msg),
+            AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, msg),
+            AppError::Validation(msg) => (StatusCode::UNPROCESSABLE_ENTITY, msg),
+            AppError::SqlxError(sqlx::Error::RowNotFound) => {
+                (StatusCode::NOT_FOUND, "recurso no encontrado".to_string())
+            }
             AppError::SqlxError(e) => {
-                tracing::error!("Error de base de datos: {e}");
-                (StatusCode::INTERNAL_SERVER_ERROR, "Error interno".to_string())
+                tracing::error!(error = ?e, "error de base de datos");
+                (StatusCode::INTERNAL_SERVER_ERROR, "error interno".to_string())
             }
             AppError::InternalServerError(msg) => {
-                tracing::error!("Error interno: {msg}");
-                (StatusCode::INTERNAL_SERVER_ERROR, "Error interno".to_string())
+                tracing::error!(error = %msg, "error interno");
+                (StatusCode::INTERNAL_SERVER_ERROR, "error interno".to_string())
             }
         };
-        (status, Json(serde_json::json!({ "error": message }))).into_response()
-    }
-}
 
-impl From<sqlx::Error> for AppError {
-    fn from(e: sqlx::Error) -> Self {
-        AppError::SqlxError(e)
+        (status, Json(serde_json::json!({ "error": message }))).into_response()
     }
 }

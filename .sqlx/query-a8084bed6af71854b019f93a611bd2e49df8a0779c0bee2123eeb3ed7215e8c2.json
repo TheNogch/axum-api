@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO users (id, username, age) VALUES ($1, $2, $3) RETURNING id, username, age, created_at, updated_at",
+  "query": "UPDATE users SET username = COALESCE($1, username), age = COALESCE($2, age), updated_at = NOW() WHERE id = $3 RETURNING *",
   "describe": {
     "columns": [
       {
@@ -31,9 +31,9 @@
     ],
     "parameters": {
       "Left": [
-        "Uuid",
         "Text",
-        "Int2"
+        "Int2",
+        "Uuid"
       ]
     },
     "nullable": [
@@ -44,5 +44,5 @@
       false
     ]
   },
-  "hash": "732ae564e9bb8c5e7c52f516547409ea8d905bf6fc991326fb06176ffdb89823"
+  "hash": "a8084bed6af71854b019f93a611bd2e49df8a0779c0bee2123eeb3ed7215e8c2"
 }
