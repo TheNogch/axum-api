@@ -2,6 +2,7 @@ mod error;
 mod config;
 mod state;
 mod users;
+mod auth;
 
 use config::Config;
 use state::AppState;

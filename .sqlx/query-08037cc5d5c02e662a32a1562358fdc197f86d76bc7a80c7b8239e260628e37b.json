@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "UPDATE users SET username = COALESCE($1, username), age = COALESCE($2, age), updated_at = NOW() WHERE id = $3 RETURNING *",
+  "query": "UPDATE users SET username = COALESCE($1, username), age = COALESCE($2, age), updated_at = NOW() \n        WHERE id = $3 RETURNING id, username, age, created_at, updated_at",
   "describe": {
     "columns": [
       {
@@ -44,5 +44,5 @@
       false
     ]
   },
-  "hash": "a8084bed6af71854b019f93a611bd2e49df8a0779c0bee2123eeb3ed7215e8c2"
+  "hash": "08037cc5d5c02e662a32a1562358fdc197f86d76bc7a80c7b8239e260628e37b"
 }

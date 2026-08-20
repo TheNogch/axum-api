@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT * FROM users ORDER BY created_at DESC",
+  "query": "SELECT id, username, age, created_at, updated_at FROM users ORDER BY created_at DESC",
   "describe": {
     "columns": [
       {
@@ -40,5 +40,5 @@
       false
     ]
   },
-  "hash": "79d6ec6e0c3275438cf735d6637075398cb2e188b4d55df37eff9d7cabc4dd5f"
+  "hash": "dadcb0ba6afe3bef3ce292ccddca0def6212b1f70a9a9e0d8ada6be848339f57"
 }

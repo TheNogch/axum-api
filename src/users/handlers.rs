@@ -14,7 +14,7 @@ pub async fn list_users(
 
     let users = sqlx::query_as!(
         User,
-        "SELECT * FROM users ORDER BY created_at DESC"
+        "SELECT id, username, age, created_at, updated_at FROM users ORDER BY created_at DESC"
     )
     .fetch_all(&state.pool)
     .await?;
@@ -54,7 +54,7 @@ pub async fn get_user(
     
     let user = sqlx::query_as!(
         User,
-        "SELECT * FROM users where id = $1",
+        "SELECT id, username, age, created_at, updated_at FROM users where id = $1",
         id
     )
     .fetch_one(&state.pool)
@@ -70,7 +70,8 @@ pub async fn update_user(
 ) -> Result<(StatusCode, Json<User>), AppError> {
     let user = sqlx::query_as!(
         User,
-        "UPDATE users SET username = COALESCE($1, username), age = COALESCE($2, age), updated_at = NOW() WHERE id = $3 RETURNING *",
+        "UPDATE users SET username = COALESCE($1, username), age = COALESCE($2, age), updated_at = NOW() 
+        WHERE id = $3 RETURNING id, username, age, created_at, updated_at",
         input.username,
         input.age,
         id
