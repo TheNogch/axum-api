@@ -5,7 +5,7 @@ use axum::{
 };
 use uuid::Uuid;
 
-use crate::{error::AppError, state::AppState};
+use crate::{auth::{extractor::AuthUser, password::hash_password}, error::AppError, state::AppState};
 use super::models::{CreateUser, User, UpdateUser};
 
 pub async fn list_users(
@@ -27,12 +27,15 @@ pub async fn create_user(
     Json(input): Json<CreateUser>,
 ) -> Result<(StatusCode, Json<User>), AppError> {
     let id = Uuid::now_v7();
+    let password_hash = hash_password(&input.password)?;
 
     let user = sqlx::query_as!(
         User,
-        "INSERT INTO users (id, username, age) VALUES ($1, $2, $3) RETURNING id, username, age, created_at, updated_at",
+        "INSERT INTO users (id, username, password_hash, age) VALUES ($1, $2, $3, $4) 
+        RETURNING id, username, age, created_at, updated_at",
         id,
         input.username,
+        password_hash,
         input.age,
     )
     .fetch_one(&state.pool)
@@ -99,4 +102,20 @@ pub async fn delete_user(
     }
     
     Ok(StatusCode::NO_CONTENT)
+}
+
+pub async fn get_me(
+    State(state): State<AppState>, 
+    AuthUser(claims): AuthUser
+) -> Result<Json<User>, AppError> {
+    
+    let user = sqlx::query_as!(
+        User,
+        "SELECT id, username, age, created_at, updated_at FROM users where id = $1",
+        claims.sub
+    )
+    .fetch_one(&state.pool)
+    .await?;
+
+    Ok(Json(user))
 }

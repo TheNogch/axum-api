@@ -14,6 +14,7 @@ pub struct User {
 #[derive(Debug, Deserialize)]
 pub struct CreateUser{
     pub username: String,
+    pub password: String, 
     pub age: i16,
 }
 

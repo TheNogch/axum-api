@@ -4,6 +4,8 @@ mod state;
 mod users;
 mod auth;
 
+use std::sync::Arc;
+
 use config::Config;
 use state::AppState;
 use sqlx::postgres::PgPoolOptions;
@@ -18,10 +20,14 @@ async fn main(){
                 .await
                 .expect("No se pudo conectar a la base de datos");
 
-    let  state = AppState { pool };
+    let  state = AppState { 
+        pool,
+        jwt_secret: Arc::new(config.jwt_secret), 
+    };
 
     let app = axum::Router::new()
                 .nest("/users", users::routes::router())
+                .nest("/auth", auth::routes::router())
                 .with_state(state);
     
     let addr = format!("{}:{}", config.server_host, config.server_port);
