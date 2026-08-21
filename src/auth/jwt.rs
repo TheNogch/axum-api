@@ -7,13 +7,15 @@ use crate::{auth::claims::Claims, error::AppError};
 
 pub fn create_token(
     user_id: Uuid,
+    role_id: Option<Uuid>,
     secret: &[u8]
 ) -> Result<String, AppError> {
     let exp = (OffsetDateTime::now_utc() + Duration::hours(24)).unix_timestamp();
 
     let claims = Claims{
         sub: user_id,
-        exp
+        exp,
+        role_id,
     };
 
     encode(&Header::default(), &claims, &EncodingKey::from_secret(secret))

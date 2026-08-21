@@ -8,7 +8,7 @@ pub async  fn login(
     Json(input): Json<LoginRequest>
 ) -> Result<Json<LoginResponse>, AppError> {
     let user = sqlx::query!(
-        "SELECT id, password_hash FROM users WHERE username = $1",
+        "SELECT id, password_hash, role_id FROM users WHERE username = $1",
         input.username
     )
     .fetch_optional(&state.pool)
@@ -21,7 +21,7 @@ pub async  fn login(
         return  Err(AppError::Unauthorized);
     }
 
-    let token = create_token(user.id, state.jwt_secret.as_bytes())?;
+    let token = create_token(user.id, user.role_id,state.jwt_secret.as_bytes())?;
 
     Ok(Json(LoginResponse{ token }))
 }
